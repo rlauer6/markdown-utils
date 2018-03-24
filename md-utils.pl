@@ -159,8 +159,14 @@ else {
 
 my $markdown = eval {
   if  ( $options{render} ) {
-    local $/;
-    render_markdown(<$fh>);  # slurp the file
+    my $raw_markdown;
+    
+    {
+      local $/;
+      $raw_markdown = <$fh>;
+    }
+    
+    render_markdown($raw_markdown);  # slurp the file
   }
   else {
     my ($toc, $markdown) = create_toc($fh);

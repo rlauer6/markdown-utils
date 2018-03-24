@@ -21,6 +21,8 @@ git clone https://github.com/rlauer6/markdown-utils.git
 sudo ln -s $(pwd)/markdown-utils/md-utlils.pl /usr/bin/md-utils
 ```
 
+[Back to TOC](#table-of-contents)
+
 # Usage
 
 1. Add &#64;TOC&#64; somewhere in your markdown
@@ -60,6 +62,8 @@ clean:
 make all
 ```
 
+[Back to TOC](#table-of-contents)
+
 ## Rendering
 
 Using the [GiHub rendering
@@ -82,6 +86,10 @@ least they do for me.
 md-utils --render README.md > README.html
 ```
 
+[Back to TOC](#table-of-contents)
+
 # Credits
 
 Rob Lauer - <rlauer6@comcast.net>
+
+[Back to TOC](#table-of-contents)
