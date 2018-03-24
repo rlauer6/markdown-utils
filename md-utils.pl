@@ -11,12 +11,67 @@ use IO::Scalar;
 use JSON;
 use LWP::UserAgent;
 
+use constant GITHUB_API => "https://api.github.com/markdown";
+
 use vars qw/$VERSION/;
 
 $VERSION = "0.1";
 our %options;
 
-use constant GITHUB_API => "https://api.github.com/markdown";
+our %GLOBALS = (
+		TOC_TITLE => "Table of Contents"
+	       );
+
+eval {
+  $GLOBALS{GIT_USER} = `git config --global user.name`;
+  chomp $GLOBALS{GIT_USER};
+  
+  $GLOBALS{GIT_EMAIL} = `git config --global user.email`;
+  chomp $GLOBALS{GIT_EMAIL};
+};
+
+our %FUNCTIONS = (
+		  TOC   => \&_create_toc,
+		  DATE  => \&_date_format,
+		 );
+		  
+sub finalize_markdown {
+  my %options = @_;
+
+  my $markdown = $options{markdown};
+  
+  my $fh = IO::Scalar->new(\$markdown);
+  my $final_markdown;
+  
+  while (my $line = <$fh>) {
+
+    if ( $line =~/\@TOC\@/ ) {
+      my $toc = $FUNCTIONS{TOC}->($options{markdown});
+      chomp $toc;
+      $line =~s/\@TOC\@/$toc/;
+    }
+
+    if ( $line =~/\@TOC_TITLE\@/ ) {
+      $line =~s/\@TOC_TITLE\@/$GLOBALS{TOC_TITLE}/s;
+    }
+
+    if ( $line =~/\@GIT_(USER|EMAIL)\@/ ) {
+      $line =~s/\@GIT_USER\@/$GLOBALS{GIT_USER}/;
+      $line =~s/\@GIT_EMAIL\@/$GLOBALS{GIT_EMAIL}/;
+    }
+
+    while ( $line =~/\@DATE(\(.*?\))?\@/ ) {
+      my $date = $FUNCTIONS{DATE}->($1);
+      $line =~s/\@DATE(\(.*?\))?\@/$date/;
+    }
+    
+    $final_markdown .= $line;
+  }
+  
+  close $fh;
+  
+  $final_markdown;
+}
 
 sub render_markdown {
   my $markdown = shift;
@@ -55,16 +110,29 @@ sub render_markdown {
   return $html;
 }
 
-sub create_toc {
-  my $fh = shift;
+sub _date_format {
+  my $template = shift;
 
-  my $toc = "# Table of Contents\n\n"
+  require Date::Format;
+  
+  $template =~s/\(\"?(.*?)\"?\)/$1/;
+
+  my $val = eval {
+    Date::Format::time2str($template, time);
+  };
+  
+  return $@ ? "<undef>" : $val;
+}
+
+sub _create_toc {
+  my $markdown = shift;
+  
+  my $fh = IO::Scalar->new(\$markdown);
+  
+  my $toc = "# \@TOC_TITLE\@\n\n"
     unless exists $options{'no-title'};
   
-  my $markdown_text;
-
   while (<$fh>) {
-    $markdown_text .= "$_";
     chomp;
 
     /^(#+)\s+(.*?)$/ && do {
@@ -83,7 +151,7 @@ sub create_toc {
   
   close $fh;
   
-  return ($toc, $markdown_text);
+  return $toc;
 }
 
 sub version {
@@ -98,10 +166,14 @@ sub usage {
   print <<eot;
 usage $0 options [markdown-file]
 
-Utility to add a table of contents to your GitHub flavored markdown.
+Utility to add a table of contents and other goodies to your GitHub
+flavored markdown.
 
  - Add \@TOC\@ where you want to see your TOC.
- - To additionally render the HTML for the markdown, use the -r option.
+ - Add \@DATE(format-str)\@ where you want to see a formatted date
+ - Add \@GIT_USER\@ where you want to see your git user name
+ - Add \@GIT_EMAIL\@ where you want to see your git email address
+ - Use the --render option to render the HTML for the markdown using the GitHub API
 
 Examples:
 ---------
@@ -118,6 +190,7 @@ Options
 -r, --render    render markdown via GitHub API
 -v, --version   version
 -n, --no-title  do not print a title for the TOC
+-t, --title     string to use for title, default: "Table of Contents"
 
 eot
 }
@@ -128,6 +201,7 @@ my @options_spec = (
 		    "help",
 		    "render",
 		    "no-title",
+		    "title=s",
 		    "debug",
 		    "version"
 		   );
@@ -145,6 +219,10 @@ if ( exists $options{version} ) {
   exit 0;
 }
 
+if ( exists $options{title} ) {
+  $GLOBALS{TOC_TITLE} = $options{title};
+}
+  
 my $fh;
 
 if ( exists $options{infile} ) {
@@ -157,21 +235,17 @@ else {
     $fh = *STDIN;
 }
 
+my $raw_markdown = eval {
+  local $/;
+  <$fh>;
+};
+
 my $markdown = eval {
   if  ( $options{render} ) {
-    my $raw_markdown;
-    
-    {
-      local $/;
-      $raw_markdown = <$fh>;
-    }
-    
     render_markdown($raw_markdown);  # slurp the file
   }
   else {
-    my ($toc, $markdown) = create_toc($fh);
-    $markdown =~s/\@TOC\@/$toc/sg;
-    $markdown;
+    finalize_markdown(markdown => $raw_markdown, %GLOBALS);
   }
 };
 

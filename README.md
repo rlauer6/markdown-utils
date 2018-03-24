@@ -3,16 +3,21 @@
 * [README](#readme)
 * [Installation](#installation)
 * [Usage](#usage)
-  * [Rendering](#rendering)
+  * [&#64;DATE(format)&#64;](#&#64;date(format)&#64;)
+  * [&#64;GIT_USER&#64;](#&#64;git_user&#64;)
+  * [&#64;GIT_EMAIL&#64;](#&#64;git_email&#64;)
+* [Rendering](#rendering)
 * [Credits](#credits)
 
+__Updated 2018-03-24__ by Rob Lauer <rlauer6@comcast.net>
 
 # README
 
 A quick search regarding how to get a table of contents into my
 markdown yieled only few hits or projects that seemed a little weighty
-to me, so here's a quick 'n dirty Perl script with few dependencies that you
-might find useful.  See [Usage](#usage) for more information.
+to me, so here's a quick 'n dirty Perl script with very few
+dependencies that you might find useful.  See [Usage](#usage) for more
+information.
 
 # Installation
 
@@ -62,9 +67,32 @@ clean:
 make all
 ```
 
+## &#64;DATE(format)&#64;
+
+Add the current date using a custom format.  Essentially calls the
+Perl function `time2str`.  See `perldoc Date::Format`
+
+Example:
+
+
+&#64;`DATE(%Y-%m-%d)`&#64;
+
+## &#64;GIT_USER&#64;
+## &#64;GIT_EMAIL&#64;
+
+If you've done something like:
+
+```
+git config --global user.name "Fred Flintstone"
+git config --global user.email "fflintstone@bedrock.org"
+```
+
+...then you can expect to see those in your markdown, otherwise expect
+nothing.
+
 [Back to TOC](#table-of-contents)
 
-## Rendering
+# Rendering
 
 Using the [GiHub rendering
 API](https://developer.github.com/v3/markdown/), you can create HTML
