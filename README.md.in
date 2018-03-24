@@ -17,7 +17,7 @@ sudo ln -s $(pwd)/markdown-utils/md-utlils.pl /usr/bin/md-utils
 
 # Usage
 
-1. Add &#32;TOC&#32; somewhere in your markdown
+1. Add &#64;TOC&#64; somewhere in your markdown
 1. Insert the table of contents to you markdown
   ```
   cat README.md.in | md-utils.pl > README.md
