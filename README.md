@@ -6,6 +6,7 @@
   * [&#64;DATE(format)&#64;](#&#64;date(format)&#64;)
   * [&#64;GIT_USER&#64;](#&#64;git_user&#64;)
   * [&#64;GIT_EMAIL&#64;](#&#64;git_email&#64;)
+  * [Custom TOC Title](#custom-toc-title)
 * [Rendering](#rendering)
 * [Credits](#credits)
 
@@ -74,7 +75,6 @@ Perl function `time2str`.  See `perldoc Date::Format`
 
 Example:
 
-
 &#64;`DATE(%Y-%m-%d)`&#64;
 
 ## &#64;GIT_USER&#64;
@@ -91,6 +91,13 @@ git config --global user.email "fflintstone@bedrock.org"
 nothing.
 
 [Back to TOC](#table-of-contents)
+
+## Custom TOC Title
+
+Use the `--no-title` option if you don't want the script to insert a
+header for the TOC.
+
+Use the `--title` option if you want a custom header for the TOC.
 
 # Rendering
 

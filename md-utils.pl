@@ -15,7 +15,8 @@ use constant GITHUB_API => "https://api.github.com/markdown";
 
 use vars qw/$VERSION/;
 
-$VERSION = "0.1";
+$VERSION = "0.2";
+
 our %options;
 
 our %GLOBALS = (
@@ -190,7 +191,7 @@ Options
 -r, --render    render markdown via GitHub API
 -v, --version   version
 -n, --no-title  do not print a title for the TOC
--t, --title     string to use for title, default: "Table of Contents"
+-t, --title     string to use for a custom title, default: "Table of Contents"
 
 eot
 }
