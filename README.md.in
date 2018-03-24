@@ -17,7 +17,7 @@ sudo ln -s $(pwd)/markdown-utils/md-utlils.pl /usr/bin/md-utils
 # Usage
 
 1. Add &#64;TOC&#64; somewhere in your markdown
-1. Insert the table of contents to you markdown
+1. Insert the table of contents to your markdown
   ```
   cat README.md.in | md-utils.pl > README.md
   ```
@@ -55,7 +55,9 @@ make all
 
 ## Rendering
 
-Using the [GiHub rendering API[(https://developer.github.com/v3/markdown/), you can create HTML pretty easily.
+Using the [GiHub rendering
+API](https://developer.github.com/v3/markdown/), you can create HTML
+pretty easily. So if you want to preview your markdown...you might try:
 
 ```
 jq --slurp --raw-input '{"text": "\(.)", "mode": "markdown"}' < README.md | \
@@ -65,7 +67,7 @@ jq --slurp --raw-input '{"text": "\(.)", "mode": "markdown"}' < README.md | \
 __...but alas you might find that your internal links don't work in
 that rendered HTML...__
 
-Never fear...the `--render` option of this utility will set that right for
+Never fear...the `--render` option of this utility will go ahead and set that right for
 you and munge the HTML so that internal links really work...or at
 least they do for me.
 

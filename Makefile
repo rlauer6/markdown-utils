@@ -5,10 +5,10 @@ MARKDOWN=$(FILES:.md.in=.md)
 HTML=$(MARKDOWN:.md=.html)
 
 $(MARKDOWN): % : %.in
-	md-utils $< > $@
+	md-utils $< > $@ || (rm -f $@ && false);
 
 $(HTML): $(MARKDOWN)
-	md-utils -r $< > $@
+	md-utils -r $< > $@ || (rm -f $@ && false);
 
 all: $(MARKDOWN) $(HTML)
 

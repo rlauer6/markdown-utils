@@ -157,9 +157,20 @@ else {
     $fh = *STDIN;
 }
 
-my ($toc, $markdown) = create_toc($fh);
+my $markdown = eval {
+  if  ( $options{render} ) {
+    local $/;
+    render_markdown(<$fh>);  # slurp the file
+  }
+  else {
+    my ($toc, $markdown) = create_toc($fh);
+    $markdown =~s/\@TOC\@/$toc/sg;
+    $markdown;
+  }
+};
 
-$markdown =~s/\@TOC\@/$toc/sg;
+die "error: $@\n"
+  if $@;
 
 my $ofh = *STDOUT;
 
@@ -167,10 +178,8 @@ if ( exists $options{outfile} ) {
   open ($ofh, ">$options{outfile}") or die "could not open output file\n";
 }
 
-my $text = exists $options{render} ? render_markdown($markdown) : $markdown;
-
-print $ofh $text;
+print $ofh $markdown;
 
 close $ofh;
 
-exit 0;
+exit(0);
