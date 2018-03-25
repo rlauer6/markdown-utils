@@ -3,14 +3,17 @@
 * [README](#readme)
 * [Installation](#installation)
 * [Usage](#usage)
-  * [&#64;DATE(format)&#64;](#&#64;date(format)&#64;)
-  * [&#64;GIT_USER&#64;](#&#64;git_user&#64;)
-  * [&#64;GIT_EMAIL&#64;](#&#64;git_email&#64;)
+  * [&#64;DATE(format)&#64;](#dateformat)
+  * [&#64;GIT_EMAIL&#64;](#git_email)
+  * [&#64;GIT_USER&#64;](#git_user)
+  * [&#64;TOC&#64;](#toc)
+  * [&#64;TOC_BACK(optional text)&#64;](#toc_backoptional-text)
   * [Custom TOC Title](#custom-toc-title)
+  * [Prevent heading from being included in table of contents](#prevent-heading-from-being-included-in-table-of-contents)
 * [Rendering](#rendering)
 * [Credits](#credits)
 
-__Updated 2018-03-24__ by Rob Lauer <rlauer6@comcast.net>
+__Updated 2018-03-25__ by Rob Lauer <rlauer6@comcast.net>
 
 # README
 
@@ -27,58 +30,62 @@ git clone https://github.com/rlauer6/markdown-utils.git
 sudo ln -s $(pwd)/markdown-utils/md-utlils.pl /usr/bin/md-utils
 ```
 
-[Back to TOC](#table-of-contents)
+[Back to Top](#table-of-contents)
 
 # Usage
 
 1. Add &#64;TOC&#64; somewhere in your markdown
-1. Insert the table of contents to your markdown
-  ```
-  cat README.md.in | md-utils.pl > README.md
-  ```
+1. Use !# to prevent heading from being part of the table of contents
+1. Finalize your markdown... 
+   ```
+   cat README.md.in | md-utils.pl > README.md
+   ```
+1. ...or...kick it old school with a `Makefile` 
 
-...or...kick it old school with a `Makefile`
+   ```
+   FILES = \
+       README.md.in
+   
+   MARKDOWN=$(FILES:.md.in=.md)
+   HTML=$(MARKDOWN:.md=.html)
+   
+   $(MARKDOWN): % : %.in
+   	md-utils $< > $@
+   
+   $(HTML): $(MARKDOWN)
+   	md-utils -r $< > $@
+   
+   all: $(MARKDOWN) $(HTML)
+   
+   markdown: $(MARKDOWN)
+   
+   html: $(HTML)
+   
+   clean:
+   	rm -f $(MARKDOWN) $(HTML)
+   ```
+1. ...and then...
 
-```
-FILES = \
-    README.md.in
-
-MARKDOWN=$(FILES:.md.in=.md)
-HTML=$(MARKDOWN:.md=.html)
-
-$(MARKDOWN): % : %.in
-	md-utils $< > $@
-
-$(HTML): $(MARKDOWN)
-	md-utils -r $< > $@
-
-all: $(MARKDOWN) $(HTML)
-
-markdown: $(MARKDOWN)
-
-html: $(HTML)
-
-clean:
-	rm -f $(MARKDOWN) $(HTML)
-```
-
-...and then...
-
-```
-make all
-```
+   ```
+   make all
+   ```
 
 ## &#64;DATE(format)&#64;
 
 Add the current date using a custom format.  Essentially calls the
-Perl function `time2str`.  See `perldoc Date::Format`
+Perl function `time2str`.  See `perldoc Date::Format`.
+
+_Best practice would be to use a `Makefile` to generate your final
+`README.md` from your `README.md.in` template as shown
+[above](#usage) and generate your `README.md` as the last step before
+pushing your branch to a repository._
 
 Example:
 
 &#64;`DATE(%Y-%m-%d)`&#64;
 
-## &#64;GIT_USER&#64;
 ## &#64;GIT_EMAIL&#64;
+## &#64;GIT_USER&#64;
 
 If you've done something like:
 
@@ -90,7 +97,21 @@ git config --global user.email "fflintstone@bedrock.org"
 ...then you can expect to see those in your markdown, otherwise expect
 nothing.
 
-[Back to TOC](#table-of-contents)
+[Back to Top](#table-of-contents)
+
+## &#64;TOC&#64;
+
+Add this tag anywhere in your markdown in include a table of contents.
+
+## &#64;TOC_BACK(optional text)&#64;
+
+Add &#64;TOC_BACK&#64; anywhere in your markdown template to insert an
+internal link back to the table of contents.
+
+@`TOC_BACK`@
+@`TOC_BACK(Back to Index)`@
+
+[Back to Top](#table-of-contents)
 
 ## Custom TOC Title
 
@@ -98,6 +119,13 @@ Use the `--no-title` option if you don't want the script to insert a
 header for the TOC.
 
 Use the `--title` option if you want a custom header for the TOC.
+
+## Prevent heading from being included in table of contents
+
+Precede the heading level with bang (!) and that heading will not be
+included in the table of contents.
+
+[Back to Top](#table-of-contents)
 
 # Rendering
 
@@ -121,10 +149,10 @@ least they do for me.
 md-utils --render README.md > README.html
 ```
 
-[Back to TOC](#table-of-contents)
+[Back to Top](#table-of-contents)
 
 # Credits
 
 Rob Lauer - <rlauer6@comcast.net>
 
-[Back to TOC](#table-of-contents)
+[Back to Top](#table-of-contents)

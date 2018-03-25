@@ -15,7 +15,7 @@ use constant GITHUB_API => "https://api.github.com/markdown";
 
 use vars qw/$VERSION/;
 
-$VERSION = "0.2";
+$VERSION = "0.3";
 
 our %options;
 
@@ -32,10 +32,18 @@ eval {
 };
 
 our %FUNCTIONS = (
-		  TOC   => \&_create_toc,
-		  DATE  => \&_date_format,
+		  TOC      => \&_create_toc,
+		  DATE     => \&_date_format,
+		  TOC_BACK => \&_back_to_toc
 		 );
-		  
+
+sub _back_to_toc {
+  my $message = shift || "Back to Table of Contents";
+  $message =~s/\(\"?(.*?)\"?\)/$1/;
+
+  return sprintf("[${message}](#%s)", $GLOBALS{TOC_BACK});
+}
+  
 sub finalize_markdown {
   my %options = @_;
 
@@ -45,7 +53,8 @@ sub finalize_markdown {
   my $final_markdown;
   
   while (my $line = <$fh>) {
-
+    $line =~s/^\!#/#/;  # ! used to prevent including header in TOC
+    
     if ( $line =~/\@TOC\@/ ) {
       my $toc = $FUNCTIONS{TOC}->($options{markdown});
       chomp $toc;
@@ -64,6 +73,11 @@ sub finalize_markdown {
     while ( $line =~/\@DATE(\(.*?\))?\@/ ) {
       my $date = $FUNCTIONS{DATE}->($1);
       $line =~s/\@DATE(\(.*?\))?\@/$date/;
+    }
+
+    if ( $line =~/\@TOC_BACK(\(.*?\))?\@/ ) {
+      my $back = $FUNCTIONS{TOC_BACK}->($1);
+      $line =~s/\@TOC_BACK(\(.*?\))?\@/$back/;
     }
     
     $final_markdown .= $line;
@@ -143,8 +157,11 @@ sub _create_toc {
       my $link = $topic;
       $link =~s/^\s*(.*)\s*$/$1/;
       $link =~s/\s+/-/g; # spaces become '-'
-      $link =~s/[']//g; # known weird characters, but expect more
-      $link=lc($link);
+      $link =~s/['\(\)]//g; # known weird characters, but expect more
+      $link = lc($link);
+      
+      # remove HTML entities
+      $link =~s/&#\d+;//g;
       
       $toc .= sprintf("%s* [%s](#%s)\n", $indent, $topic, $link);
     };
@@ -171,6 +188,7 @@ Utility to add a table of contents and other goodies to your GitHub
 flavored markdown.
 
  - Add \@TOC\@ where you want to see your TOC.
+ - Add \@TOC_BACK\@ to insert an internal link to TOC
  - Add \@DATE(format-str)\@ where you want to see a formatted date
  - Add \@GIT_USER\@ where you want to see your git user name
  - Add \@GIT_EMAIL\@ where you want to see your git email address
@@ -192,6 +210,11 @@ Options
 -v, --version   version
 -n, --no-title  do not print a title for the TOC
 -t, --title     string to use for a custom title, default: "Table of Contents"
+
+Tips
+----
+Use !# to prevent a header from being include in the table of contents.
+Add your own custom back to TOC message \@TOC_BACK(Back to Index)\@
 
 eot
 }
@@ -223,6 +246,9 @@ if ( exists $options{version} ) {
 if ( exists $options{title} ) {
   $GLOBALS{TOC_TITLE} = $options{title};
 }
+
+$GLOBALS{TOC_BACK} = lc($GLOBALS{TOC_TITLE});
+$GLOBALS{TOC_BACK} =~s/\s/-/g;
   
 my $fh;
 
