@@ -15,7 +15,7 @@ use constant GITHUB_API => "https://api.github.com/markdown";
 
 use vars qw/$VERSION/;
 
-$VERSION = "0.3";
+$VERSION = "0.4";
 
 our %options;
 
@@ -36,6 +36,7 @@ our %FUNCTIONS = (
 		  DATE     => \&_date_format,
 		  TOC_BACK => \&_back_to_toc
 		 );
+
 
 sub _back_to_toc {
   my $message = shift || "Back to Table of Contents";
@@ -113,6 +114,7 @@ sub render_markdown {
     while (<$fh>) {
       chomp;
       s/(href|id)=\"\#?user-content-/$1=\"/;
+      s/(href|id)=\"\#\%60(.*)\%60/$1=\"#$2/;
       $html .= "$_\n";
     }
     
@@ -157,7 +159,7 @@ sub _create_toc {
       my $link = $topic;
       $link =~s/^\s*(.*)\s*$/$1/;
       $link =~s/\s+/-/g; # spaces become '-'
-      $link =~s/['\(\)]//g; # known weird characters, but expect more
+      $link =~s/['\(\),]//g; # known weird characters, but expect more
       $link = lc($link);
       
       # remove HTML entities

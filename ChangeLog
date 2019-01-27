@@ -1,0 +1,6 @@
+Sun Jan 27 16:11:25 2019  Rob Lauer  <rlauer6@comcast.net>
+
+	[0.4]:
+	* remove backticks from links in rendered HTML
+	* remove ',' from headings for TOC
+
