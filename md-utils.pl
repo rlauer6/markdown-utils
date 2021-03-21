@@ -160,11 +160,16 @@ sub _create_toc {
       $link =~s/^\s*(.*)\s*$/$1/;
       $link =~s/\s+/-/g; # spaces become '-'
       $link =~s/['\(\),\`]//g; # known weird characters, but expect more
+      $link =~s|/||g;
+      
       $link = lc($link);
       
       # remove HTML entities
       $link =~s/&#\d+;//g;
       
+      # remove escaped entities
+      $link =~s/({|})//g;
+        
       $toc .= sprintf("%s* [%s](#%s)\n", $indent, $topic, $link);
     };
   }
