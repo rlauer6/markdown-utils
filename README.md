@@ -13,7 +13,7 @@
 * [Rendering](#rendering)
 * [Credits](#credits)
 
-__Updated 2018-03-25__ by Rob Lauer <rlauer6@comcast.net>
+__Updated 2021-11-17__ by  <>
 
 # README
 
@@ -75,6 +75,8 @@ sudo ln -s $(pwd)/markdown-utils/md-utlils.pl /usr/bin/md-utils
 Add the current date using a custom format.  Essentially calls the
 Perl function `time2str`.  See `perldoc Date::Format`.
 
+If no format is present the default is %Y-%m-%d (YYYY-MM-DD).
+
 _Best practice would be to use a `Makefile` to generate your final
 `README.md` from your `README.md.in` template as shown
 [above](#usage) and generate your `README.md` as the last step before
@@ -109,6 +111,7 @@ Add &#64;TOC_BACK&#64; anywhere in your markdown template to insert an
 internal link back to the table of contents.
 
 @`TOC_BACK`@
+
 @`TOC_BACK(Back to Index)`@
 
 [Back to Top](#table-of-contents)
@@ -117,7 +120,6 @@ internal link back to the table of contents.
 
 Use the `--no-title` option if you don't want the script to insert a
 header for the TOC.
-
 Use the `--title` option if you want a custom header for the TOC.
 
 ## Prevent heading from being included in table of contents

@@ -1,3 +1,13 @@
+Wed Nov 17 08:34:27 2021  Rob Lauer  <rlauer@apple.com>
+
+	[date format]:
+	* md-utils.pl
+	- make default date format %Y-%m-%d
+	- usage tip
+	* Makefile: create md-utils
+	* README.md.in: update date format docs
+	* README.md: generated
+
 Sun Mar 21 08:15:39 2021  Rob Lauer  <rlauer6@comcast.net>
 
 	* md-utils.pl

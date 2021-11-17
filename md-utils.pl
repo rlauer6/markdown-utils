@@ -72,7 +72,8 @@ sub finalize_markdown {
     }
 
     while ( $line =~/\@DATE(\(.*?\))?\@/ ) {
-      my $date = $FUNCTIONS{DATE}->($1);
+      my $format = $1 ? $1 : '%Y-%m-%d';
+      my $date = $FUNCTIONS{DATE}->($format);
       $line =~s/\@DATE(\(.*?\))?\@/$date/;
     }
 
@@ -107,6 +108,7 @@ sub render_markdown {
 
   if ( $rsp->is_success ) {
     my $markdown_html = $rsp->content;
+    print $markdown_html;
     
     my $fh = IO::Scalar->new(\$markdown_html);
     
@@ -220,10 +222,14 @@ Options
 
 Tips
 ----
-Use !# to prevent a header from being include in the table of contents.
-Add your own custom back to TOC message \@TOC_BACK(Back to Index)\@
+* Use !# to prevent a header from being include in the table of contents.
+  Add your own custom back to TOC message \@TOC_BACK(Back to Index)\@
+
+* Date format strings are based on format strings supported by the Perl
+  module 'Date::Format'.  The default format is %Y-%m-%d if not format is given.
 
 eot
+
 }
 
 my @options_spec = (

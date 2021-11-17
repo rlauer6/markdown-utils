@@ -5,16 +5,20 @@ MARKDOWN=$(FILES:.md.in=.md)
 HTML=$(MARKDOWN:.md=.html)
 
 $(MARKDOWN): % : %.in
-	md-utils $< > $@ || (rm -f $@ && false);
+	./md-utils $< > $@ || (rm -f $@ && false);
 
 $(HTML): $(MARKDOWN)
-	md-utils -r $< > $@ || (rm -f $@ && false);
+	./md-utils -r $< > $@ || (rm -f $@ && false);
 
-all: $(MARKDOWN) $(HTML)
+all: md-utils $(MARKDOWN) $(HTML)
 
 markdown: $(MARKDOWN)
 
 html: $(HTML)
+
+md-utils: md-utils.pl
+	cp $< $@
+	chmod +x $@
 
 clean:
 	rm -f $(MARKDOWN) $(HTML)

@@ -62,6 +62,8 @@ sudo ln -s $(pwd)/markdown-utils/md-utlils.pl /usr/bin/md-utils
 Add the current date using a custom format.  Essentially calls the
 Perl function `time2str`.  See `perldoc Date::Format`.
 
+If no format is present the default is %Y-%m-%d (YYYY-MM-DD).
+
 _Best practice would be to use a `Makefile` to generate your final
 `README.md` from your `README.md.in` template as shown
 [above](#usage) and generate your `README.md` as the last step before
