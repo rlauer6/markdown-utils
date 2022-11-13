@@ -4,11 +4,12 @@ FILES = \
 MARKDOWN=$(FILES:.md.in=.md)
 HTML=$(MARKDOWN:.md=.html)
 
-$(MARKDOWN): % : %.in
+$(MARKDOWN): % : %.in md-utils
+	set -x; \
 	./md-utils $< > $@ || (rm -f $@ && false);
 
 $(HTML): $(MARKDOWN)
-	./md-utils -r $< > $@ || (rm -f $@ && false);
+	./md-utils.pl -r $< > $@ || (rm -f $@ && false);
 
 all: md-utils $(MARKDOWN) $(HTML)
 

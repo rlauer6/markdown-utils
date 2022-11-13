@@ -13,7 +13,7 @@
 * [Rendering](#rendering)
 * [Credits](#credits)
 
-__Updated 2021-11-17__ by  <>
+__Updated 2022-11-13__ by anonymouse <anonymouse@example.com>
 
 # README
 

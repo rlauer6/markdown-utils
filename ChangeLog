@@ -1,3 +1,11 @@
+Sun Nov 13 18:07:31 2022  Rob Lauer  <rlauer6@comcast.net>
+
+	[Markdown::Render]:
+	* Markdown/Render.pm: new
+	* md-utils.pl: refactored to use above
+	* README.md: tweaks
+	* Makefile: md-utils is a dependency
+
 Wed Nov 17 08:34:27 2021  Rob Lauer  <rlauer6@comast.net>
 
 	[date format]:
