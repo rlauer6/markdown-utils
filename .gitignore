@@ -1,3 +1,5 @@
 pod2*.tmp
 md-utils
 **/*~
+*.rpm
+rpm/**

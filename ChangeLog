@@ -1,3 +1,12 @@
+Tue Nov 15 08:30:33 2022  Rob Lauer  <rlauer6@comcast.net>
+
+	[1.02.2]: make rpm
+	* Makefile: make rpm
+	* perl-Markdown.spec: new
+	* .gitignore: rpm/**, *.rpm
+	* README.md.in: added note on rpm building
+	* README.md: generated
+
 Mon Nov 14 17:06:34 2022  Rob Lauer  <rlauer6@comcast.net>
 
 	[1.02]:

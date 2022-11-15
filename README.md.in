@@ -42,6 +42,16 @@ make
 sudo ln -s $(pwd)/markdown-utils/md-utlils.pl /usr/bin/md-utils
 ```
 
+## Building an rpm
+
+If you want to build an rpm for a RedHat Linux based system, install
+the `rpm-build` tools.
+
+```
+make rpm
+sudo yum install 'perl(Markdown::Render)'
+```
+
 @TOC_BACK(Back to Top)@
 
 # Usage

@@ -4,6 +4,7 @@
 * [Installation](#installation)
   * [Prerequisites](#prerequisites)
   * [Building and Deploying](#building-and-deploying)
+  * [Building an rpm](#building-an-rpm)
 * [Usage](#usage)
 * [Tips & Tricks](#tips--tricks)
   * [&#64;DATE(format)&#64;](#dateformat)
@@ -56,6 +57,16 @@ this.
 git clone https://github.com/rlauer6/markdown-utils.git
 make
 sudo ln -s $(pwd)/markdown-utils/md-utlils.pl /usr/bin/md-utils
+```
+
+## Building an rpm
+
+If you want to build an rpm for a RedHat Linux based system, install
+the `rpm-build` tools.
+
+```
+make rpm
+sudo yum install 'perl(Markdown::Render)'
 ```
 
 [Back to Top](#table-of-contents)
