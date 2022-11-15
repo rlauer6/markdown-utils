@@ -2,7 +2,10 @@
 
 * [README](#readme)
 * [Installation](#installation)
+  * [Prerequisites](#prerequisites)
+  * [Building and Deploying](#building-and-deploying)
 * [Usage](#usage)
+* [Tips & Tricks](#tips--tricks)
   * [&#64;DATE(format)&#64;](#dateformat)
   * [&#64;GIT_EMAIL&#64;](#git_email)
   * [&#64;GIT_USER&#64;](#git_user)
@@ -13,20 +16,45 @@
 * [Rendering](#rendering)
 * [Credits](#credits)
 
-__Updated 2022-11-13__ by anonymouse <anonymouse@example.com>
+__Updated 2022-11-15__ by Rob Lauer <rlauer6@comcast.net>
 
 # README
 
 A quick search regarding how to get a table of contents into my
-markdown yieled only few hits or projects that seemed a little weighty
-to me, so here's a quick 'n dirty Perl script with very few
+markdown yielded only a few hits or projects that seemed a little weighty
+to me, so here's a little Perl script with just a few
 dependencies that you might find useful.  See [Usage](#usage) for more
 information.
 
+The script will render your markdown as HTML using either the [GitHub
+API](https://docs.github.com/en/rest/markdown) or the Perl module [Text::Markdown](https://metacpan.org/pod/Text::Markdown)
+
+A default stylesheet will be applied but you can provide your own
+style sheet as well.
+
 # Installation
+
+## Prerequisites
+
+The script has been tested with these versions, but others might work
+too. At some point I'll probably create a proper CPAN distribution for
+this.
+
+| Module                   | Version |
+|--------------------------|---------|
+| `Class::Accessor::Fast`  | 0.51  |
+| `Date::Format`           | 2.24  |
+| `HTTP::Request`          | 6.00  |
+| `IO::Scalar`             | 2.113 |
+| `JSON`                   | 4.03  |
+| `LWP::UserAgent`         | 6.36  |
+| `Readonly`               | 2.05  |
+
+## Building and Deploying
 
 ```
 git clone https://github.com/rlauer6/markdown-utils.git
+make
 sudo ln -s $(pwd)/markdown-utils/md-utlils.pl /usr/bin/md-utils
 ```
 
@@ -34,26 +62,75 @@ sudo ln -s $(pwd)/markdown-utils/md-utlils.pl /usr/bin/md-utils
 
 # Usage
 
+```
+usage: md-utils options [markdown-file]
+
+Utility to add a table of contents and other goodies to your GitHub
+flavored markdown.
+
+ - Add @TOC@ where you want to see your TOC.
+ - Add @TOC_BACK@ to insert an internal link to TOC
+ - Add @DATE(format-str)@ where you want to see a formatted date
+ - Add @GIT_USER@ where you want to see your git user name
+ - Add @GIT_EMAIL@ where you want to see your git email address
+ - Use the --render option to render the HTML for the markdown
+
+Examples:
+---------
+ md-utils README.md.in > README.md
+
+ md-utils -r README.md.in
+
+Options
+-------
+-B, --body     default is to add body tag, use --nobody to prevent    
+-b, --both     interpolates intermediate file and renders HTML
+-c, --css      css file
+-e, --engine   github, text_markdown (default: github)
+-h             help
+-i, --infile   input file, default: STDIN
+-m, --mode     for GitHub API mode is 'gfm' or 'markdown' (default: markdown)
+-n, --no-titl  do not print a title for the TOC
+-o, --outfile  outfile, default: STDOUT
+-r, --render   render only, does NOT interpolate keywords
+-R, --raw      return raw HTML from engine
+-t, --title    string to use for a custom title, default: "Table of Contents"
+-v, --version  version
+
+Tips
+----
+* Use !# to prevent a header from being include in the table of contents.
+  Add your own custom back to TOC message @TOC_BACK(Back to Index)@
+
+* Date format strings are based on format strings supported by the Perl
+  module 'Date::Format'.  The default format is %Y-%m-%d if not format is given.
+
+* use the --nobody tag to return the HTML without the <html><body></body></html>
+  wrapper. --raw mode will also return HTML without wrapper
+```
+
+# Tips & Tricks
+
 1. Add &#64;TOC&#64; somewhere in your markdown
 1. Use !# to prevent heading from being part of the table of contents
-1. Finalize your markdown... 
+1. Finalize your markdown...
    ```
    cat README.md.in | md-utils.pl > README.md
    ```
-1. ...or...kick it old school with a `Makefile` 
-
+1. ...or...kick it old school with a `Makefile` if you like
    ```
    FILES = \
        README.md.in
-   
+
    MARKDOWN=$(FILES:.md.in=.md)
    HTML=$(MARKDOWN:.md=.html)
    
+   # interpolate the custom markdown keywords
    $(MARKDOWN): % : %.in
-   	md-utils $< > $@
+       md-utils $< > $@
    
    $(HTML): $(MARKDOWN)
-   	md-utils -r $< > $@
+       md-utils -r $< > $@
    
    all: $(MARKDOWN) $(HTML)
    
@@ -62,13 +139,12 @@ sudo ln -s $(pwd)/markdown-utils/md-utlils.pl /usr/bin/md-utils
    html: $(HTML)
    
    clean:
-   	rm -f $(MARKDOWN) $(HTML)
+       rm -f $(MARKDOWN) $(HTML)
    ```
 1. ...and then...
-
-   ```
-   make all
-   ```
+    ```
+    make all
+    ```
 
 ## &#64;DATE(format)&#64;
 
@@ -96,8 +172,15 @@ git config --global user.name "Fred Flintstone"
 git config --global user.email "fflintstone@bedrock.org"
 ```
 
-...then you can expect to see those in your markdown, otherwise expect
-nothing.
+or
+
+```
+git config --local user.name "Fred Flintstone"
+git config --local user.email "fflintstone@bedrock.org"
+```
+
+...then you can expect to see those in your markdown, otherwise don't
+use the tags.
 
 [Back to Top](#table-of-contents)
 

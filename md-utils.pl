@@ -4,12 +4,21 @@ use strict;
 use warnings;
 
 use Carp;
+use Cwd;
+use Config::Tiny;
+use Data::Dumper;
 use English qw(-no_match_vars);
 use File::Basename;
-use Getopt::Long;
+use Getopt::Long qw(:config no_ignore_case auto_abbrev);
+use Readonly;
+
 use Markdown::Render;
 
 our $VERSION = $Markdown::Render::VERSION;
+
+Readonly our $EMPTY => q{};
+Readonly our $TRUE  => 1;
+Readonly our $FALSE => 0;
 
 ########################################################################
 sub version {
@@ -25,7 +34,7 @@ sub version {
 sub usage {
 ########################################################################
   print <<'END_OF_USAGE';
-usage md-utils options [markdown-file]
+usage: md-utils options [markdown-file]
 
 Utility to add a table of contents and other goodies to your GitHub
 flavored markdown.
@@ -35,25 +44,29 @@ flavored markdown.
  - Add @DATE(format-str)@ where you want to see a formatted date
  - Add @GIT_USER@ where you want to see your git user name
  - Add @GIT_EMAIL@ where you want to see your git email address
- - Use the --render option to render the HTML for the markdown using the GitHub API
+ - Use the --render option to render the HTML for the markdown
 
 Examples:
 ---------
- md-utils-toc.pl README.md.in > README.md
+ md-utils README.md.in > README.md
 
- md-utils-toc.pl -r README.md.in
+ md-utils -r README.md.in
 
 Options
 -------
--i, --infile    input file, default: STDIN
--o, --outfile   outfile, default: STDOUT
--h              help
--r, --render    render markdown via GitHub API
--b, --both      interpolates intermediate file and renders HTML
--c, --css       css file
--v, --version   version
--n, --no-title  do not print a title for the TOC
--t, --title     string to use for a custom title, default: "Table of Contents"
+-B, --body     default is to add body tag, use --nobody to prevent    
+-b, --both     interpolates intermediate file and renders HTML
+-c, --css      css file
+-e, --engine   github, text_markdown (default: github)
+-h             help
+-i, --infile   input file, default: STDIN
+-m, --mode     for GitHub API mode is 'gfm' or 'markdown' (default: markdown)
+-n, --no-titl  do not print a title for the TOC
+-o, --outfile  outfile, default: STDOUT
+-r, --render   render only, does NOT interpolate keywords
+-R, --raw      return raw HTML from engine
+-t, --title    string to use for a custom title, default: "Table of Contents"
+-v, --version  version
 
 Tips
 ----
@@ -63,8 +76,28 @@ Tips
 * Date format strings are based on format strings supported by the Perl
   module 'Date::Format'.  The default format is %Y-%m-%d if not format is given.
 
+* use the --nobody tag to return the HTML without the <html><body></body></html>
+  wrapper. --raw mode will also return HTML without wrapper
 END_OF_USAGE
   return;
+}
+
+########################################################################
+sub get_git_user {
+########################################################################
+  my ( $git_user, $git_email );
+
+  for ( ( getcwd . '.git/config' ), "$ENV{HOME}/.gitconfig" ) {
+    next if !-e $_;
+
+    my $config = eval { Config::Tiny->read($_); };
+
+    ( $git_user, $git_email ) = @{ $config->{user} }{qw(name email)};
+
+    last if $git_user && $git_email;
+  }
+
+  return ( $git_user, $git_email );
 }
 
 # +------------------------ +
@@ -74,12 +107,30 @@ END_OF_USAGE
 my %options;
 
 my @options_spec = qw(
-  infile=s outfile=s help render css=s
-  no-title title=s  debug version both
+  body|B!
+  both|b
+  css=s
+  debug
+  engine=s
+  help
+  infile=s
+  mode=s
+  no-title
+  outfile=s
+  raw|R
+  render|r
+  title=s
+  version
 );
 
 GetOptions( \%options, @options_spec )
   or croak 'could not parse options';
+
+$options{body} //= $TRUE;
+
+if ( $options{raw} ) {
+  $options{body} = $FALSE;
+}
 
 if ( exists $options{help} ) {
   usage;
@@ -108,6 +159,11 @@ if ( !$options{infile} ) {
     $markdown = <$fh>;
   }
 }
+
+my ( $git_user, $git_email ) = get_git_user();
+
+$options{git_user}  = $git_user  // $EMPTY;
+$options{git_email} = $git_email // $EMPTY;
 
 my $md = Markdown::Render->new( %options, markdown => $markdown );
 

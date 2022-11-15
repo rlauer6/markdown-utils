@@ -3,14 +3,16 @@ package Markdown::Render;
 use strict;
 use warnings;
 
+use Carp;
 use Data::Dumper;
 use English qw(-no_match_vars);
 use HTTP::Request;
 use IO::Scalar;
 use JSON;
 use LWP::UserAgent;
+use List::Util qw(none);
 
-our $VERSION = '1.01';
+our $VERSION = '1.02';
 
 use parent qw(Class::Accessor::Fast);
 
@@ -18,15 +20,19 @@ __PACKAGE__->follow_best_practice;
 
 __PACKAGE__->mk_accessors(
   qw(
-    infile
-    html
-    render
-    no_title
-    title
-    markdown
     css
-    git_user
+    engine
     git_email
+    git_user
+    html
+    infile
+    markdown
+    mode
+    no_title
+    raw
+    body
+    render
+    title
   )
 );
 
@@ -48,11 +54,12 @@ sub new {
 
   my %options = ref $args[0] ? %{ $args[0] } : @args;
 
-  my $self = $class->SUPER::new( \%options );
+  $options{title}  //= $TOC_TITLE;
+  $options{css}    //= $DEFAULT_CSS;
+  $options{mode}   //= 'markdown';
+  $options{engine} //= 'github';
 
-  if ( !$self->get_title ) {
-    $self->set_title($TOC_TITLE);
-  }
+  my $self = $class->SUPER::new( \%options );
 
   if ( $self->get_infile ) {
     open my $fh, '<', $self->get_infile
@@ -63,10 +70,6 @@ sub new {
     $self->set_markdown(<$fh>);
 
     close $fh;
-  }
-
-  if ( !$self->get_css ) {
-    $self->set_css($DEFAULT_CSS);
   }
 
   return $self;
@@ -88,7 +91,7 @@ sub back_to_toc {
 ########################################################################
   my ( $self, $message ) = @_;
 
-  $message //= $TOC_BACK;
+  $message ||= $TOC_BACK;
 
   $message =~ s/[(]\"?(.*?)\"?[)]/$1/xsm;
 
@@ -108,11 +111,22 @@ sub finalize_markdown {
   my $fh = IO::Scalar->new( \$markdown );
 
   my $final_markdown;
+  my $in_code_block;
 
   while ( my $line = <$fh> ) {
+
+    if ( $line =~ /\A\s*[`]{3}\s*\z/xsm ) {
+      $in_code_block ^= 1;
+    }
+
+    if ($in_code_block) {
+      $final_markdown .= $line;
+      next;
+    }
+
     $line =~ s/^\!\#/\#/xsm;  # ! used to prevent including header in TOC
 
-    if ( $line =~ /\@TOC\@/xsm ) {
+    if ( $line =~ /^\@TOC\@/xsm ) {
       my $toc = $self->create_toc;
 
       chomp $toc;
@@ -135,18 +149,20 @@ sub finalize_markdown {
       $line =~ s/\@GIT_EMAIL\@/$git_email/xsm;
     }
 
-    while ( $line =~ /\@DATE([(].*?[)])?\@/xsm ) {
+    my $date;
+
+    while ( $line =~ /\@DATE[(]?(.*?)[)]?\@/xsm ) {
       my $format = $1 ? $1 : '%Y-%m-%d';
 
-      my $date = $self->format_date($format);
+      $date = $self->format_date($format);
 
-      $line =~ s/\@DATE([(].*?[)])?\@/$date/xsm;
+      $line =~ s /\@DATE[(]?(.*?)[)]?\@/$date/xsm;
     }
 
-    if ( $line =~ /\@TOC_BACK([(].*?[)])?\@/xsm ) {
+    if ( $line =~ /\@TOC_BACK[(]?(.*?)[)]?\@/xsm ) {
       my $back = $self->back_to_toc($1);
 
-      $line =~ s/\@TOC_BACK([(].*?[)])?\@/$back/xsm;
+      $line =~ s/\@TOC_BACK[(]?(.*?)[)]?\@/$back/xsm;
     }
 
     $final_markdown .= $line;
@@ -161,7 +177,96 @@ sub finalize_markdown {
 }
 
 ########################################################################
+sub _render_with_text_markdown {
+########################################################################
+  my ($self) = @_;
+
+  eval { require Text::Markdown; };
+
+  if ($EVAL_ERROR) {
+    croak "no Text::Markdown available...try using GitHub API.\n$EVAL_ERROR";
+  }
+
+  my $tm = Text::Markdown->new( trust_list_start_value => 1 );
+
+  my $markdown = $self->get_markdown;
+  my $html     = Text::Markdown::markdown($markdown);
+
+  if ( $self->get_raw ) {
+    $self->set_html($html);
+  }
+  else {
+    $self->fix_anchors( Text::Markdown::markdown($markdown) );
+  }
+
+  return $self;
+}
+
+########################################################################
+sub fix_anchors {
+########################################################################
+  my ( $self, $html_raw ) = @_;
+
+  my $fh = IO::Scalar->new( \$html_raw );
+
+  my $html;
+
+  while ( my $line = <$fh> ) {
+    # remove garbage if there...
+    if ( $line =~ /^\s*<h(\d+)><a (.*)>(.*)<\/a>(.*)/xsm ) {
+      $line = "<h$1>$3$4</h$1>\n";
+    }
+
+    $html .= _fix_header($line);
+  }
+
+  close $fh;
+
+  $self->set_html($html);
+
+  return $self;
+}
+
+########################################################################
+sub _fix_header {
+########################################################################
+  my ($line) = @_;
+
+  return $line if $line !~ /^\s*<h(\d+)>(.*?)<\/h\d>$/xsm;
+
+  my ( $hn, $anchor, $header ) = ( $1, $2, $2 );  ## no critic (ProhibitCaptureWithoutTest)
+
+  $anchor = lc $anchor;
+  $anchor =~ s/\s+/-/gxsm;                        # spaces become '-'
+  $anchor =~ s/[\@'(),\`]//xsmg;                  # known weird characters, but expect more
+  $anchor =~ s/\///xsmg;
+
+  $line
+    = sprintf qq{<h%d><a id="%s" class="anchor" href="#%s"></a>%s</h%d>\n},
+    $hn,
+    $anchor, $anchor, $header, $hn;
+
+  return $line;
+}
+
+########################################################################
 sub render_markdown {
+########################################################################
+  my ($self) = @_;
+
+  if ( $self->get_engine eq 'github' ) {
+    return $self->_render_with_github;
+  }
+  elsif ( $self->get_engine eq 'text_markdown' ) {
+    return $self->_render_with_text_markdown;
+  }
+  else {
+    croak 'invalid engine: ' . $self->get_engine;
+  }
+}
+
+########################################################################
+sub _render_with_github {
 ########################################################################
   my ($self) = @_;
 
@@ -170,36 +275,57 @@ sub render_markdown {
   my $ua  = LWP::UserAgent->new;
   my $req = HTTP::Request->new( 'POST', $GITHUB_API );
 
+  my $mode = $self->get_mode;
+
+  if ( none { $mode eq $_ } qw(gfm markdown) ) {
+    $mode = 'markdown';
+  }
+
   my $api_request = {
     text => $markdown,
-    mode => 'markdown'
+    mode => $mode,
   };
 
   $req->content( to_json($api_request) );
 
   my $rsp = $ua->request($req);
-  my $html;
 
-  if ( $rsp->is_success ) {
-    my $markdown_html = $rsp->content;
+  croak 'could not render using GitHub API: ' . $rsp->status_line
+    if !$rsp->is_success;
 
-    my $fh = IO::Scalar->new( \$markdown_html );
+  if ( $self->get_raw ) {
+    $self->set_html( $rsp->content );
 
-    # remove junk thrown in by the API that breaks internal links
-    while (<$fh>) {
-      chomp;
+    return $self;
+  }
 
-      s/(href|id)=\"\#?user-content-/$1=\"/xsm;
-      s/(href|id)=\"\#?\%60.*\%60/$1=\"#$2/xsm;
-
-      $html .= "$_\n";
-    }
-
-    close $fh;
+  if ( $self->get_mode eq 'gfm' ) {
+    return $self->fix_anchors( $rsp->content );
   }
   else {
-    die $rsp->status_line;
+    return $self->fix_github_html( $rsp->content );
   }
+}
+
+########################################################################
+sub fix_github_html {
+########################################################################
+  my ( $self, $html_raw ) = @_;
+
+  my $fh = IO::Scalar->new( \$html_raw );
+
+  my $html = $EMPTY;
+
+  while ( my $line = <$fh> ) {
+    chomp $line;
+
+    $line =~ s/(href|id)=\"\#?user-content-/$1=\"/xsm;
+    $line =~ s/(href|id)=\"\#?\%60.*\%60/$1=\"#$2/xsm;
+
+    $html .= "$line\n";
+  }
+
+  close $fh;
 
   $self->set_html($html);
 
@@ -247,7 +373,7 @@ sub create_toc {
 
       $link =~ s/\s+/-/gxsm;  # spaces become '-'
 
-      $link =~ s/['(),\`]//xsmg;  # known weird characters, but expect more
+      $link =~ s/[\@'(),\`]//xsmg;  # known weird characters, but expect more
 
       $link =~ s/\///xsmg;
 
@@ -256,8 +382,8 @@ sub create_toc {
       # remove HTML entities
       $link =~ s/&\#\d+;//xsmg;
 
-      # remove escaped entities
-      $link =~ s/[{}]//xsmg;
+      # remove escaped entities and remaining noisy characters
+      $link =~ s/[{}&]//xsmg;
 
       $toc .= sprintf "%s* [%s](#%s)\n", $indent, $topic, $link;
     };
@@ -273,10 +399,16 @@ sub print_html {
 ########################################################################
   my ( $self, %options ) = @_;
 
+  my $fh = $options{fh} // *STDOUT;
+
+  if ( !$options{body} ) {
+    print {$fh} $self->get_html;
+
+    return;
+  }
+
   my $css   = exists $options{css}   ? $options{css}   : $self->get_css;
   my $title = exists $options{title} ? $options{title} : $self->get_infile;
-
-  my $fh = $options{fh} // *STDOUT;
 
   my $title_section = $title ? "<title>$title</title>" : $EMPTY;
 
@@ -298,7 +430,7 @@ sub print_html {
 
   my $body = $self->get_html;
 
-  print <<"END_OF_TEXT";
+  print {$fh} <<"END_OF_TEXT";
 <html>
   $head_section
   <body>
@@ -336,7 +468,7 @@ __END__
 
 =head1 NAME
 
-Markdown::Render - Use the GitHub markdown API to render markdown as HTML
+Markdown::Render - Render markdown as HTML
 
 =head1 SYNOPSIS
 
@@ -348,8 +480,8 @@ Markdown::Render - Use the GitHub markdown API to render markdown as HTML
 
 =head1 DESCRIPTION
 
-Renders markdown as HTML using GitHub's API. Optionally adds
-additional metadata to document using tags.
+Renders markdown as HTML using either GitHub's API or L<Text::Markdown>. Optionally adds
+additional metadata to markdown document using custom tags.
 
 See L<README.md|https://github.com/rlauer6/markdown-utils/blob/master/README.md> for more details.
 
@@ -359,11 +491,20 @@ See L<README.md|https://github.com/rlauer6/markdown-utils/blob/master/README.md>
 
  new( options )
 
+Any of the options passed to the C<new> method can also be set or
+retrieved use the C<set_NAME> or C<get_NAME> methods.
+
 =over 5
 
 =item css
 
 URL of a CSS file to add to head section of printed HTML.
+
+=item engine
+
+One of C<github> or C<text_markdown>.
+
+default: github
 
 =item git_user
 
@@ -381,6 +522,12 @@ Path to a file in markdow format.
 
 Text of the markdown to be rendered.
 
+=item mode
+
+If using the GitHub API, mode can be either C<gfm> or C<markdown>.
+
+default: markdown
+
 =item no_title
 
 Boolean that indicates that no title should be added to the table of contents.
@@ -395,7 +542,7 @@ Title to be used for the table of contents.
 
 =head2 finalize_markdown
 
-Updates the markdown by interpolating the keywords. Invoking this
+Updates the markdown by interpolating the custom keywords. Invoking this
 method will create a table of contents and replace keywords with their
 values.
 

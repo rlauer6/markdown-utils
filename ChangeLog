@@ -1,3 +1,32 @@
+Mon Nov 14 17:06:34 2022  Rob Lauer  <rlauer6@comcast.net>
+
+	[1.02]:
+	* .gitignore: new
+	* README.md.in: updated docs
+	* README.md: generated
+	* Markdown/Render.pm
+	- more pod
+	- bump version
+	(new)
+	- new options css, mode, engine, raw, body
+	(_render_with_text_markdown): use Text::Markdown
+	(_render_with_github): refactored render_markdown()
+	(render_markdown): invoke selected engine
+	(fix_header): new
+	(_fix_header): new
+	(fix_anchors): new
+	(fix_github_hml): new
+	* md-utils.pl:
+	- support new options
+	- implement git user vars
+	(back_to_toc): || not //
+	(finalize_markdown)
+	- don't interpolate inside code blocks
+	- allow empty parens () or no parens for @DATE@, @TOC_BACK@
+	(create_toc)
+	- remove \@
+	- remove & after removing HTML entities
+
 Sun Nov 13 18:07:31 2022  Rob Lauer  <rlauer6@comcast.net>
 
 	[Markdown::Render]:
