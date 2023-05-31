@@ -21,8 +21,7 @@ style sheet as well.
 ## Prerequisites
 
 The script has been tested with these versions, but others might work
-too. At some point I'll probably create a proper CPAN distribution for
-this.
+too.
 
 | Module                   | Version |
 |--------------------------|---------|
@@ -53,6 +52,13 @@ sudo yum install 'perl(Markdown::Render)'
 ```
 
 @TOC_BACK(Back to Top)@
+
+
+## Building from CPAN
+
+```
+cpanm -v Markdown::Render
+```
 
 # Usage
 

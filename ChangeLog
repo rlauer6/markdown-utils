@@ -1,6 +1,15 @@
+Wed May 31 02:25:00 2023  Rob Lauer  <rlauer6@comcast.net>
+
+	[1.03 - CPAN distribution]:
+	* README.md.in: CPAN installation
+	* cpan/Makefile: new
+	* Markdown/Render.pm: bump version, pod updates
+	* README.md: generated
+	* .gitignore: cpan/bin, cpan/lib
+
 Tue Nov 15 08:30:33 2022  Rob Lauer  <rlauer6@comcast.net>
 
-	[1.02.2]: make rpm
+	[1.02]: make rpm
 	* Makefile: make rpm
 	* perl-Markdown.spec: new
 	* .gitignore: rpm/**, *.rpm

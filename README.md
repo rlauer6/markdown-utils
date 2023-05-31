@@ -5,6 +5,7 @@
   * [Prerequisites](#prerequisites)
   * [Building and Deploying](#building-and-deploying)
   * [Building an rpm](#building-an-rpm)
+  * [Building from CPAN](#building-from-cpan)
 * [Usage](#usage)
 * [Tips & Tricks](#tips--tricks)
   * [&#64;DATE(format)&#64;](#dateformat)
@@ -17,7 +18,7 @@
 * [Rendering](#rendering)
 * [Credits](#credits)
 
-__Updated 2022-11-15__ by Rob Lauer <rlauer6@comcast.net>
+__Updated 2023-05-31__ by Rob Lauer <rlauer6@comcast.net>
 
 # README
 
@@ -38,8 +39,7 @@ style sheet as well.
 ## Prerequisites
 
 The script has been tested with these versions, but others might work
-too. At some point I'll probably create a proper CPAN distribution for
-this.
+too.
 
 | Module                   | Version |
 |--------------------------|---------|
@@ -70,6 +70,13 @@ sudo yum install 'perl(Markdown::Render)'
 ```
 
 [Back to Top](#table-of-contents)
+
+
+## Building from CPAN
+
+```
+cpanm -v Markdown::Render
+```
 
 # Usage
 

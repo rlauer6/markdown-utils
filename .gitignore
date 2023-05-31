@@ -1,3 +1,5 @@
+cpan/lib
+cpan/bin
 pod2*.tmp
 md-utils
 **/*~

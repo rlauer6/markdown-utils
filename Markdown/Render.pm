@@ -12,7 +12,7 @@ use JSON;
 use LWP::UserAgent;
 use List::Util qw(none);
 
-our $VERSION = '1.02';
+our $VERSION = '1.03';
 
 use parent qw(Class::Accessor::Fast);
 
@@ -478,12 +478,23 @@ Markdown::Render - Render markdown as HTML
 
  $md->render_markdown->print_html;
 
+...or from the command line to create HTML
+
+ md-utils.pl -r README.md > README.html
+
+...or from the command line to replace render custom tags
+
+ md-utils.pl README.md.in > README.md
+
 =head1 DESCRIPTION
 
-Renders markdown as HTML using either GitHub's API or L<Text::Markdown>. Optionally adds
-additional metadata to markdown document using custom tags.
+Renders markdown as HTML using either GitHub's API or
+L<Text::Markdown>. Optionally adds additional metadata to markdown
+document using custom tags.
 
-See L<README.md|https://github.com/rlauer6/markdown-utils/blob/master/README.md> for more details.
+See
+L<README.md|https://github.com/rlauer6/markdown-utils/blob/master/README.md>
+for more details.
 
 =head1 METHODS AND SUBROUTINES
 
@@ -512,7 +523,7 @@ Name of the git user that is used in the C<GIT_USER> tag.
 
 =item git_email
 
-Email address of the git user is used in the C<GIT_EMAIL> tag.
+Email address of the git user that is used in the C<GIT_EMAIL> tag.
 
 =item infile
 
@@ -530,7 +541,8 @@ default: markdown
 
 =item no_title
 
-Boolean that indicates that no title should be added to the table of contents.
+Boolean that indicates that no title should be added to the table of
+contents.
 
 default: false
 
@@ -572,7 +584,7 @@ Outputs the fully rendered HTML page.
 URL of a CSS style sheet to include in the head section. If no CSS
 file option is passed a default CSS file will b used. If a CSS element
 is passed but it is undefined or empty, then no CSS will be specified
-i the final document.
+in the final document.
 
 =item title
 
@@ -585,7 +597,7 @@ will be added to the document.
 
 =head1 AUTHOR
 
-Rob Lauer - rclauer@gmail.com
+Rob Lauer - rlauer6@comcast.net
 
 =head1 SEE OTHER
 
