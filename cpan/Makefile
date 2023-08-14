@@ -18,10 +18,11 @@ EXTRA: ChangeLog README.md
 ChangeLog:
 	cp ../ChangeLog $@
 
-bin/md-utils.pl:
+bin/md-utils.pl: ../md-utils.pl
+	test -d bin/ || mkdir bin/
 	cp ../md-utils.pl $@
 
-lib/Markdown/Render.pm:
+lib/Markdown/Render.pm: ../Markdown/Render.pm
 	test -d lib/Markdown || mkdir -p lib/Markdown
 	cp ../Markdown/Render.pm $@ 
 

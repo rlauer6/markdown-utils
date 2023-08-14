@@ -12,7 +12,7 @@ use JSON;
 use LWP::UserAgent;
 use List::Util qw(none);
 
-our $VERSION = '1.03';
+our $VERSION = '1.04';
 
 use parent qw(Class::Accessor::Fast);
 
@@ -181,22 +181,22 @@ sub _render_with_text_markdown {
 ########################################################################
   my ($self) = @_;
 
-  eval { require Text::Markdown; };
+  eval { require Text::Markdown::Discount; };
 
   if ($EVAL_ERROR) {
-    croak "no Text::Markdown available...try using GitHub API.\n$EVAL_ERROR";
+    carp
+      "no Text::Markdown::Discount available...using GitHub API.\n$EVAL_ERROR";
+    return $self->_render_with_github;
   }
 
-  my $tm = Text::Markdown->new( trust_list_start_value => 1 );
-
   my $markdown = $self->get_markdown;
-  my $html     = Text::Markdown::markdown($markdown);
+  my $html     = Text::Markdown::Discount::markdown($markdown);
 
   if ( $self->get_raw ) {
     $self->set_html($html);
   }
   else {
-    $self->fix_anchors( Text::Markdown::markdown($markdown) );
+    $self->fix_anchors( Text::Markdown::Discount::markdown($markdown) );
   }
 
   return $self;
@@ -489,12 +489,18 @@ Markdown::Render - Render markdown as HTML
 =head1 DESCRIPTION
 
 Renders markdown as HTML using either GitHub's API or
-L<Text::Markdown>. Optionally adds additional metadata to markdown
+L<Text::Markdown::Discount>. Optionally adds additional metadata to markdown
 document using custom tags.
 
 See
 L<README.md|https://github.com/rlauer6/markdown-utils/blob/master/README.md>
 for more details.
+
+I<Note: This module originally used L<Text::Markdown> as an
+alternative to using the GitHub API however, there are too many bugs
+and idiosyncracies in that module. This module will now use
+L<Text::Markdown::Discount> which is not only faster, but seems to be
+more compliant with GFM.>
 
 =head1 METHODS AND SUBROUTINES
 
@@ -602,5 +608,6 @@ Rob Lauer - rlauer6@comcast.net
 =head1 SEE OTHER
 
 L<GitHub Markdown API|https://docs.github.com/en/rest/markdown>
+L<Text::Markdown::Discount>
 
 =cut
