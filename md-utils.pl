@@ -67,6 +67,7 @@ Options
 -R, --raw      return raw HTML from engine
 -t, --title    string to use for a custom title, default: "Table of Contents"
 -v, --version  version
+-N, --nocss    do not add any CSS link
 
 Tips
 ----
@@ -121,6 +122,7 @@ my @options_spec = qw(
   render|r
   title=s
   version
+  nocss|N
 );
 
 GetOptions( \%options, @options_spec )

@@ -1,7 +1,14 @@
+**/*.tar.gz
 cpan/lib
 cpan/bin
+cpan/provides
+cpan/requires
 pod2*.tmp
 md-utils
 **/*~
 *.rpm
 rpm/**
+cpan/ChangeLog
+cpan/extra
+cpan/README.md
+cpan/README

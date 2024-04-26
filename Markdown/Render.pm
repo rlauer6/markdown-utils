@@ -12,7 +12,7 @@ use JSON;
 use LWP::UserAgent;
 use List::Util qw(none);
 
-our $VERSION = '1.04';
+our $VERSION = '1.05';
 
 use parent qw(Class::Accessor::Fast);
 
@@ -55,7 +55,7 @@ sub new {
   my %options = ref $args[0] ? %{ $args[0] } : @args;
 
   $options{title}  //= $TOC_TITLE;
-  $options{css}    //= $DEFAULT_CSS;
+  $options{css}    //= $options{nocss} ? $EMPTY : $DEFAULT_CSS;
   $options{mode}   //= 'markdown';
   $options{engine} //= 'github';
 
@@ -184,8 +184,7 @@ sub _render_with_text_markdown {
   eval { require Text::Markdown::Discount; };
 
   if ($EVAL_ERROR) {
-    carp
-      "no Text::Markdown::Discount available...using GitHub API.\n$EVAL_ERROR";
+    carp "no Text::Markdown::Discount available...using GitHub API.\n$EVAL_ERROR";
     return $self->_render_with_github;
   }
 
@@ -501,6 +500,12 @@ alternative to using the GitHub API however, there are too many bugs
 and idiosyncracies in that module. This module will now use
 L<Text::Markdown::Discount> which is not only faster, but seems to be
 more compliant with GFM.>
+
+I<Note: Text::Markdown::Discount relies on the text-markdown library
+which did not actually support all of the markdown features (including
+code fencing).  You can find an updated version of
+L<Text::Markdown::Discount> here:
+L<https://github.com/rlauer6/text-markdown-discount>>
 
 =head1 METHODS AND SUBROUTINES
 
