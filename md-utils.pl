@@ -11,6 +11,7 @@ use English qw(-no_match_vars);
 use File::Basename;
 use Getopt::Long qw(:config no_ignore_case auto_abbrev);
 use Readonly;
+use Pod::Usage qw(pod2usage);
 
 use Markdown::Render;
 
@@ -27,59 +28,6 @@ sub version {
 
   print "$name $VERSION\n";
 
-  return;
-}
-
-########################################################################
-sub usage {
-########################################################################
-  print <<'END_OF_USAGE';
-usage: md-utils options [markdown-file]
-
-Utility to add a table of contents and other goodies to your GitHub
-flavored markdown.
-
- - Add @TOC@ where you want to see your TOC.
- - Add @TOC_BACK@ to insert an internal link to TOC
- - Add @DATE(format-str)@ where you want to see a formatted date
- - Add @GIT_USER@ where you want to see your git user name
- - Add @GIT_EMAIL@ where you want to see your git email address
- - Use the --render option to render the HTML for the markdown
-
-Examples:
----------
- md-utils README.md.in > README.md
-
- md-utils -r README.md.in
-
-Options
--------
--B, --body     default is to add body tag, use --nobody to prevent    
--b, --both     interpolates intermediate file and renders HTML
--c, --css      css file
--e, --engine   github, text_markdown (default: github)
--h             help
--i, --infile   input file, default: STDIN
--m, --mode     for GitHub API mode is 'gfm' or 'markdown' (default: markdown)
--n, --no-titl  do not print a title for the TOC
--o, --outfile  outfile, default: STDOUT
--r, --render   render only, does NOT interpolate keywords
--R, --raw      return raw HTML from engine
--t, --title    string to use for a custom title, default: "Table of Contents"
--v, --version  version
--N, --nocss    do not add any CSS link
-
-Tips
-----
-* Use !# to prevent a header from being include in the table of contents.
-  Add your own custom back to TOC message @TOC_BACK(Back to Index)@
-
-* Date format strings are based on format strings supported by the Perl
-  module 'Date::Format'.  The default format is %Y-%m-%d if not format is given.
-
-* use the --nobody tag to return the HTML without the <html><body></body></html>
-  wrapper. --raw mode will also return HTML without wrapper
-END_OF_USAGE
   return;
 }
 
@@ -135,8 +83,7 @@ if ( $options{raw} ) {
 }
 
 if ( exists $options{help} ) {
-  usage;
-  exit 0;
+  pod2usage(0);
 }
 
 if ( exists $options{version} ) {
@@ -199,3 +146,147 @@ close $ofh;
 exit 0;
 
 __END__
+
+=head1 NAME
+
+md-utils - Render markdown as HTML
+
+=head1 SYNOPSIS
+
+  md-utils [options] [markdown-file]
+
+=head1 DESCRIPTION
+
+Utility to add a table of contents and other goodies to your GitHub
+flavored markdown.
+
+=over
+
+=item *
+
+Add C<@TOC@> where you want to see your TOC.
+
+=item *
+
+Add C<@TOC_BACK@> to insert an internal link to TOC.
+
+=item *
+
+Add C<@DATE(I<format-str>)@> where you want to see a formatted date.
+
+=item *
+
+Add C<@GIT_USER@> where you want to see your git user name.
+
+=item *
+
+Add C<@GIT_EMAIL@> where you want to see your git email address.
+
+=item *
+
+Use the --render option to render the HTML for the markdown
+
+=back
+
+=head1 EXAMPLES
+
+ md-utils README.md.in > README.md
+
+ md-utils -r README.md.in
+
+=head1 OPTIONS
+
+=over
+
+=item B<-B>, B<--body>
+
+Default is to add body tag, use --nobody to prevent.
+
+=item B<-b>, B<--both>
+
+Interpolates intermediate file and renders HTML.
+
+=item B<-c>, B<--css>
+
+CSS file.
+
+=item B<-e>, B<--engine>
+
+Engine to use, options: github, text_markdown (default: github).
+
+=item B<-h>, B<--help>
+
+Help.
+
+=item B<-i>, B<--infile>
+
+Input file, default: STDIN
+
+=item B<-m>, B<--mode>
+
+For GitHub API mode is 'gfm' or 'markdown' (default: markdown).
+
+=item B<-n>, B<--no-title>
+
+Do not print a title for the table of contents.
+
+=item B<-N>, B<--nocss>
+
+Do not add a CSS link.
+
+=item B<-o>, B<--outfile>
+
+Output file, default: STDOUT.
+
+=item B<-r>, B<--render>
+
+Render only, does NOT interpolate keywords.
+
+=item B<-R>, B<--raw>
+
+Return raw HTML from engine.
+
+=item B<-t>, B<--title>
+
+String to use for the table of contents title, default: "Table of Contents".
+
+=item B<-v>, B<--version>
+
+Print the version.
+
+=back
+
+=head1 TIPS
+
+=over
+
+=item *
+
+Use C<!#> to prevent a header from being included in the table of contents.
+Add your own custom "back to TOC" message C<@TOC_BACK(Back to Index)@>.
+
+=item *
+
+Date format strings are based on format strings supported by the Perl module
+L<Date::Format>. The default format is C<%Y-%m-%d> if no format is given.
+
+=item *
+
+Use the --nobody tag to return the HTML without the
+C<< <html><body></body></html> >> wrapper. --raw mode will also return HTML
+without wrapper.
+
+=back
+
+=head1 SEE ALSO
+
+L<Markdown::Render>
+
+=head1 AUTHOR AND LICENSE
+
+Rob Lauer - rlauer6@comcast.net
+
+This program is free software; you can use it and/or distribute it under the
+same terms as Perl itself.
+
+=cut
