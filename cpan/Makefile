@@ -13,7 +13,7 @@ TARBALL = \
 
 all: $(TARBALL)
 
-EXTRA: ChangeLog README.md
+EXTRA: ChangeLog README.md t/00-markdown.t t/files/README.md.in
 
 ChangeLog:
 	cp ../ChangeLog $@
@@ -32,7 +32,9 @@ UNIT_TESTS =
 
 EXTRA = \
     ChangeLog \
-    README.md
+    README.md \
+    t/00-markdown.t \
+    t/files/README.md.in
 
 extra:
 	rm -f $@
@@ -40,7 +42,7 @@ extra:
 	  echo $$a >> $@; \
 	done
 
-$(TARBALL): $(PERL_MODULES) $(PERL_SCRIPTS) ChangeLog README.md extra
+$(TARBALL): $(PERL_MODULES) $(PERL_SCRIPTS) $(EXTRA) extra
 	 make-cpan-dist \
 	   -e bin \
 	   -f extra \
@@ -54,6 +56,14 @@ $(TARBALL): $(PERL_MODULES) $(PERL_SCRIPTS) ChangeLog README.md extra
 
 README.md: ../README.md.in
 	../md-utils.pl  $< > $@ || rm -f $@
+
+t/files/README.md.in: ../README.md.in
+	test -d t/files || mkdir -p t/files
+	cp $< $@
+
+t/00-markdown.t: ../t/00-markdown.t
+	test -d t || mkdir -p t
+	cp $< $@
 
 install: $(TARBALL)
 	cpanm -v -l $$HOME  $<
