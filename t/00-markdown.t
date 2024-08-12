@@ -3,18 +3,34 @@
 use strict;
 use warnings;
 
-use lib qw{.};
+use lib qw{$Bin/..};
+use FindBin qw($Bin);
 
 use Data::Dumper;
 use English qw{-no_match_vars};
 use Test::More;
-use Bedrock::Test::Utils qw(:all);
 
-our %TESTS = fetch_test_descriptions(*DATA);  # from Test::Utils
+our %TESTS = (
+    new             => 'Markdown::Render->new',
+    render_markdown => 'render HTML from markdown file',
+);
 
 ########################################################################
 
 plan tests => 1 + keys %TESTS;
+
+# Find the test input file.
+my $test_file;
+for ('files', '..') {
+    my $file = "$Bin/$_/README.md.in";
+    if (-f $file) {
+        $test_file = $file;
+        last;
+    }
+}
+
+BAIL_OUT("Unable to find test file")
+    unless defined $test_file;
 
 use_ok('Markdown::Render');
 
@@ -23,7 +39,7 @@ subtest 'new' => sub {
 ########################################################################
   my $md = eval {
     Markdown::Render->new(
-      infile => 'README.md.in',
+      infile => $test_file,
       engine => 'text_markdown',
     );
   };
@@ -40,7 +56,7 @@ subtest 'render_markdown' => sub {
 ########################################################################
   my $md = eval {
     Markdown::Render->new(
-      infile => 'README.md.in',
+      infile => $test_file,
       engine => 'text_markdown',
     );
   };
@@ -67,6 +83,4 @@ subtest 'render_markdown' => sub {
 1;
 
 __DATA__
-new => Markdown::Render->new
-render_markdown => render HTML from markdown file
-END_OF_PLAN  
+END_OF_PLAN
