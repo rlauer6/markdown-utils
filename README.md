@@ -18,7 +18,7 @@
 * [Rendering](#rendering)
 * [Credits](#credits)
 
-__Updated 2024-04-26__ by Rob Lauer <rlauer6@comcast.net>
+__Updated 2024-11-24__ by Rob Lauer <rlauer6@comcast.net>
 
 # README
 

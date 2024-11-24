@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/bin/env perl
 
 use strict;
 use warnings;
@@ -117,12 +117,12 @@ my @options_spec = qw(
   infile=s
   mode=s
   no-title
+  nocss|N
   outfile=s
   raw|R
   render|r
   title=s
   version
-  nocss|N
 );
 
 GetOptions( \%options, @options_spec )

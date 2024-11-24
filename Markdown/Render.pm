@@ -12,7 +12,7 @@ use JSON;
 use LWP::UserAgent;
 use List::Util qw(none);
 
-our $VERSION = '1.05';
+our $VERSION = '1.60.1';
 
 use parent qw(Class::Accessor::Fast);
 
@@ -20,6 +20,7 @@ __PACKAGE__->follow_best_practice;
 
 __PACKAGE__->mk_accessors(
   qw(
+    body
     css
     engine
     git_email
@@ -30,7 +31,6 @@ __PACKAGE__->mk_accessors(
     mode
     no_title
     raw
-    body
     render
     title
   )
@@ -237,7 +237,7 @@ sub _fix_header {
 
   $anchor = lc $anchor;
   $anchor =~ s/\s+/-/gxsm;                        # spaces become '-'
-  $anchor =~ s/[\@'(),\`]//xsmg;                  # known weird characters, but expect more
+  $anchor =~ s/[.:\?_.\@'(),\`]//xsmg;            # known weird characters, but expect more
   $anchor =~ s/\///xsmg;
 
   $line
@@ -372,7 +372,7 @@ sub create_toc {
 
       $link =~ s/\s+/-/gxsm;  # spaces become '-'
 
-      $link =~ s/[\@'(),\`]//xsmg;  # known weird characters, but expect more
+      $link =~ s/[\?\_:.\@'(),\`]//xsmg;  # known weird characters, but expect more
 
       $link =~ s/\///xsmg;
 
