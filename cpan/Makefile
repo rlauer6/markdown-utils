@@ -1,4 +1,5 @@
 MODULE = Markdown::Render	
+VERSION := $(shell perl -I . -MMarkdown::Render -e 'print $$Markdown::Render::VERSION')
 
 AUTHOR = 'BIGFOOT <bigfoot@cpan.org>'
 
@@ -9,7 +10,7 @@ PERL_SCRIPTS = \
     bin/md-utils.pl
 
 TARBALL = \
-    Markdown-Render.tar.gz
+    Markdown-Render-$(VERSION).tar.gz
 
 all: $(TARBALL)
 
@@ -52,7 +53,6 @@ $(TARBALL): $(PERL_MODULES) $(PERL_SCRIPTS) $(EXTRA) extra
 	   -a $(AUTHOR) \
 	   -d $(DESCRIPTION) \
 	   -H .
-	cp $$(ls -1rt *.tar.gz | tail -1) $@
 
 README.md: ../README.md.in
 	../md-utils.pl  $< > $@ || rm -f $@

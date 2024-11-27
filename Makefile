@@ -47,4 +47,3 @@ clean:
 	rm -f $(MARKDOWN)
 	rm -rf rpm
 	rm -f *.rpm
-
