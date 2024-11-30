@@ -272,6 +272,7 @@ sub _render_with_github {
   my $markdown = $self->get_markdown;
 
   my $ua  = LWP::UserAgent->new;
+  $ua->env_proxy;
   my $req = HTTP::Request->new( 'POST', $GITHUB_API );
 
   my $mode = $self->get_mode;
