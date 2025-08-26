@@ -1,6 +1,7 @@
 **/*.tar.gz
 cpan/lib
 cpan/bin
+**/*.tmp
 cpan/provides
 cpan/requires
 pod2*.tmp
