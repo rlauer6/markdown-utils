@@ -12,7 +12,7 @@ use JSON;
 use LWP::UserAgent;
 use List::Util qw(none);
 
-our $VERSION = '1.60.4';
+our $VERSION = '@PACKAGE_VERSION@';
 
 use parent qw(Class::Accessor::Fast);
 
@@ -241,7 +241,7 @@ sub _fix_header {
 
   $anchor = lc $anchor;
   $anchor =~ s/\s+/-/gxsm;                        # spaces become '-'
-  $anchor =~ s/[.:\?_.\@'(),\`]//xsmg;            # known weird characters, but expect more
+  $anchor =~ s/[.:\?_.\@'(),\`\*]//xsmg;          # known weird characters, but expect more
   $anchor =~ s/\///xsmg;
 
   $line
@@ -376,7 +376,7 @@ sub create_toc {
 
       $link =~ s/\s+/-/gxsm;  # spaces become '-'
 
-      $link =~ s/[\?\_:.\@'(),\`]//xsmg;  # known weird characters, but expect more
+      $link =~ s/[\?\_:.\@'(),\`\*]//xsmg;  # known weird characters, but expect more
 
       $link =~ s/\///xsmg;
 
@@ -613,6 +613,10 @@ will be added to the document.
 =head1 AUTHOR
 
 Rob Lauer - rlauer6@comcast.net
+
+=head1 LICENSE
+
+This software is licensed under the same terms as Perl.
 
 =head1 SEE OTHER
 

@@ -1,3 +1,5 @@
+\#*
+.\#*
 **/*.tar.gz
 cpan/lib
 cpan/bin
@@ -14,3 +16,5 @@ cpan/extra
 cpan/README.md
 cpan/README
 cpan/t
+lib/**/*.pm
+bin/**/*.pl

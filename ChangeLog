@@ -1,3 +1,28 @@
+Thu Oct  9 20:52:16 2025  Rob Lauer  <rclauer@gmail.com>
+
+	[2.0.0]:
+	* VERSION: new
+	* README.md: generated
+	* version.mk: new
+	* .gitignore
+	* ChangeLog
+	* Makefile
+	- make source from .in files
+	- version targets
+	- get version from VERSION
+	* bin/md-utils.pl.in
+	- refactored to use CLI::Simple
+	* cpan/Makefile: slight refactoring
+	* lib/Markdown/Render.pm.in
+	- use *PACKAGE_VERSION@
+	(_fix_header): remove '*'
+	(create_toc): likewise
+	* Markdown/Render.pm -> lib/Markdown/Render.pm.in
+	* md-utils.pl -> bin/md-utils.pl.in
+	* .gitignore
+	- ignore .pm, .pl, temp files
+	* perl-Markdown-Render.spec: removed
+
 Tue Aug 26 15:55:36 2025  Rob Lauer  <rlauer6@comcast.net>
 
 	[1.60.4]:

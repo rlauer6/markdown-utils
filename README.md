@@ -4,7 +4,6 @@
 * [Installation](#installation)
   * [Prerequisites](#prerequisites)
   * [Building and Deploying](#building-and-deploying)
-  * [Building an rpm](#building-an-rpm)
   * [Building from CPAN](#building-from-cpan)
 * [Usage](#usage)
 * [Tips & Tricks](#tips--tricks)
@@ -16,9 +15,9 @@
   * [Custom TOC Title](#custom-toc-title)
   * [Prevent heading from being included in table of contents](#prevent-heading-from-being-included-in-table-of-contents)
 * [Rendering](#rendering)
-* [Credits](#credits)
+* [License](#license)
 
-__Updated 2025-08-26__ by Rob Lauer <rlauer6@comcast.net>
+__Updated 2025-10-09__ by anonymouse <rclauer@gmail.com>
 
 # README
 
@@ -53,24 +52,19 @@ too.
 
 ## Building and Deploying
 
+The build will now create a CPAN distribution.
+
 ```
 git clone https://github.com/rlauer6/markdown-utils.git
-make
-sudo ln -s $(pwd)/markdown-utils/md-utlils.pl /usr/bin/md-utils
+make && make cpan
 ```
 
-## Building an rpm
-
-If you want to build an rpm for a RedHat Linux based system, install
-the `rpm-build` tools.
+To deploy the application use `cpanm`
 
 ```
-make rpm
-sudo yum install 'perl(Markdown::Render)'
+curl -L https://cpanmin.us | perl - --sudo App::cpanminus
+cpanm -n -v cpan/Markdown-Render-*.tar.gz
 ```
-
-[Back to Top](#table-of-contents)
-
 
 ## Building from CPAN
 
@@ -81,51 +75,60 @@ cpanm -v Markdown::Render
 # Usage
 
 ```
-usage: md-utils options [markdown-file]
+Usage:
+     md-utils.pl options [markdown-file]
 
-Utility to add a table of contents and other goodies to your GitHub
-flavored markdown.
+    Utility to add a table of contents and other goodies to your GitHub
+    flavored markdown.
 
- - Add @TOC@ where you want to see your TOC.
- - Add @TOC_BACK@ to insert an internal link to TOC
- - Add @DATE(format-str)@ where you want to see a formatted date
- - Add @GIT_USER@ where you want to see your git user name
- - Add @GIT_EMAIL@ where you want to see your git email address
- - Use the --render option to render the HTML for the markdown
+    *   @TOC@ where you want to see your TOC.
 
-Examples:
----------
- md-utils README.md.in > README.md
+    *   @TOC_BACK@ to insert an internal link to TOC
 
- md-utils -r README.md.in
+    *   @DATE(format-str)@ where you want to see a formatted date
 
-Options
--------
--B, --body     default is to add body tag, use --nobody to prevent    
--b, --both     interpolates intermediate file and renders HTML
--c, --css      css file
--e, --engine   github, text_markdown (default: github)
--h             help
--i, --infile   input file, default: STDIN
--m, --mode     for GitHub API mode is 'gfm' or 'markdown' (default: markdown)
--n, --no-titl  do not print a title for the TOC
--o, --outfile  outfile, default: STDOUT
--r, --render   render only, does NOT interpolate keywords
--R, --raw      return raw HTML from engine
--t, --title    string to use for a custom title, default: "Table of Contents"
--v, --version  version
--N, --nocss    no css
+    *   @GIT_USER@ where you want to see your git user name
 
-Tips
-----
-* Use !# to prevent a header from being include in the table of contents.
-  Add your own custom back to TOC message @TOC_BACK(Back to Index)@
+    *   @GIT_EMAIL@ where you want to see your git email address
 
-* Date format strings are based on format strings supported by the Perl
-  module 'Date::Format'.  The default format is %Y-%m-%d if not format is given.
+    *   the --render option to render the HTML for the markdown
 
-* use the --nobody tag to return the HTML without the <html><body></body></html>
-  wrapper. --raw mode will also return HTML without wrapper
+  Examples:
+     md-utils.pl README.md.in > README.md
+
+     md-utils.pl -r README.md.in
+
+  Options:
+     -B, --body     default is to add body tag, use --nobody to prevent    
+     -b, --both     interpolates intermediate file and renders HTML
+     -c, --css      css file
+     -e, --engine   github, text_markdown (default: github)
+     -h             help
+     -i, --infile   input file, default: STDIN
+     -m, --mode     for GitHub API mode is 'gfm' or 'markdown' (default: markdown)
+     -n, --no-titl  do not print a title for the TOC
+     -o, --outfile  outfile, default: STDOUT
+     -r, --render   render only, does NOT interpolate keywords
+     -R, --raw      return raw HTML from engine
+     -t, --title    string to use for a custom title, default: "Table of Contents"
+     -v, --version  version
+     -N, --nocss    do not add any CSS link
+
+  Tips:
+    *   Use !# to prevent a header from being include in the table of
+        contents.
+
+        Add your own custom back to TOC message @TOC_BACK(Back to Index)@
+
+    *   Date format strings are based on format strings supported by the
+        Perl module 'Date::Format'.
+
+        The default format is %Y-%m-%d if not format is given.
+
+    *   use the --nobody tag to return the HTML without the
+        <html><body></body></html> wrapper.
+
+        "--raw" mode will also return HTML without wrapper.
 ```
 
 # Tips & Tricks
@@ -255,8 +258,8 @@ md-utils --render README.md > README.html
 
 [Back to Top](#table-of-contents)
 
-# Credits
+# License
 
-Rob Lauer - <rlauer6@comcast.net>
+This software is licensed under the same terms as Perl.
 
 [Back to Top](#table-of-contents)

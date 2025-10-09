@@ -1,12 +1,23 @@
 MODULE = Markdown::Render	
-VERSION := $(shell perl -I . -MMarkdown::Render -e 'print $$Markdown::Render::VERSION')
+
+SHELL := /bin/bash
+
+.SHELLFLAGS := -ec
+
+VERSION := $(shell cat ../VERSION)
 
 AUTHOR = 'BIGFOOT <bigfoot@cpan.org>'
 
 PERL_MODULES = \
+    ../lib/Markdown/Render.pm
+
+GPERL_MODULES = \
     lib/Markdown/Render.pm
 
 PERL_SCRIPTS = \
+    ../bin/md-utils.pl
+
+GPERL_SCRIPTS = \
     bin/md-utils.pl
 
 TARBALL = \
@@ -16,16 +27,17 @@ all: $(TARBALL)
 
 EXTRA: ChangeLog README.md t/00-markdown.t t/files/README.md.in
 
-ChangeLog:
+ChangeLog: ../ChangeLog
 	cp ../ChangeLog $@
 
-bin/md-utils.pl: ../md-utils.pl
+$(GPERL_SCRIPTS): $(PERL_SCRIPTS)
 	test -d bin/ || mkdir bin/
-	cp ../md-utils.pl $@
+	cp $< $@
+	chmod +x $@
 
-lib/Markdown/Render.pm: ../Markdown/Render.pm
+$(GPERL_MODULES): $(PERL_MODULES)
 	test -d lib/Markdown || mkdir -p lib/Markdown
-	cp ../Markdown/Render.pm $@ 
+	cp $< $@
 
 DESCRIPTION = "Render markdown using GitHub API"
 
@@ -43,7 +55,7 @@ extra:
 	  echo $$a >> $@; \
 	done
 
-$(TARBALL): $(PERL_MODULES) $(PERL_SCRIPTS) $(EXTRA) extra
+$(TARBALL): $(GPERL_MODULES) $(GPERL_SCRIPTS) $(EXTRA) extra
 	 make-cpan-dist \
 	   -e bin \
 	   -f extra \
@@ -55,7 +67,7 @@ $(TARBALL): $(PERL_MODULES) $(PERL_SCRIPTS) $(EXTRA) extra
 	   -H .
 
 README.md: ../README.md.in
-	../md-utils.pl  $< > $@ || rm -f $@
+	../bin/md-utils.pl  $< > $@ || rm -f $@
 
 t/files/README.md.in: ../README.md.in
 	test -d t/files || mkdir -p t/files

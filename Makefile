@@ -1,49 +1,49 @@
-VERSION = 1.02
-RELEASE = 2
+SHELL := /bin/bash
 
-RPM_NAME = perl-Markdown-Render
+.SHELLFLAGS := -ec
 
-RPM = $(RPM_NAME)-$(VERSION)-$(RELEASE).noarch.rpm
-SPEC_FILE = $(RPM_NAME).spec
+VERSION := $(shell cat VERSION)
 
 FILES = \
     README.md.in
+
+all: md-utils $(MARKDOWN) $(HTML)
 
 MARKDOWN=$(FILES:.md.in=.md)
 HTML=$(MARKDOWN:.md=.html)
 
 $(MARKDOWN): % : %.in md-utils
 	set -x; \
-	./md-utils $< > $@ || (rm -f $@ && false);
+	bin/md-utils.pl $< > $@ || (rm -f $@ && false);
 
 $(HTML): $(MARKDOWN)
-	./md-utils.pl -r $< > $@ || (rm -f $@ && false);
+	bin/md-utils.pl -r $< > $@ || (rm -f $@ && false);
 
-all: md-utils $(MARKDOWN) $(HTML)
+.PHONY: md-utils
+
+md-utils: bin/md-utils.pl lib/Markdown/Render.pm
 
 markdown: $(MARKDOWN)
 
 html: $(HTML)
 
-md-utils: md-utils.pl
-	cp $< $@
+.PHONY: cpan
+
+cpan:
+	cd cpan && $(MAKE)
+
+lib/Markdown/Render.pm: lib/Markdown/Render.pm.in
+	sed -e 's/[@]PACKAGE_VERSION[@]/$(VERSION)/' < $< > $@
+
+bin/md-utils.pl: bin/md-utils.pl.in
+	sed -e 's/[@]PACKAGE_VERSION[@]/$(VERSION)/' < $< > $@
 	chmod +x $@
 
-$(RPM): $(SPEC_FILE)
-	mkdir -p rpm/{RPMS,SOURCES,BUILDROOT,BUILD,SPEC}
-	rpmbuild -ba $< \
-	  --define "_sourcedir $$PWD/Markdown" \
-	  --define "_topdir $$PWD/rpm" \
-	  --define "_version $(VERSION)" \
-	  --define "_prefix /usr/local" \
-	  --define "_release $(RELEASE)"
-	cp rpm/RPMS/noarch/$(RPM) $@
-
-rpm: $(RPM)
-
-.PHONY: rpm
+include version.mk
 
 clean:
-	rm -f $(MARKDOWN)
-	rm -rf rpm
-	rm -f *.rpm
+	rm -f bin/md-utils.pl lib/Markdown/Render.pm
+	rm -rf cpan/lib
+	rm -rf cpan/bin
+	rm -rf cpan/t
+	rm -f cpan/README.md
