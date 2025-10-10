@@ -38,12 +38,14 @@ __PACKAGE__->mk_accessors(
 
 use Readonly;
 
-Readonly our $GITHUB_API  => 'https://api.github.com/markdown';
-Readonly our $EMPTY       => q{};
-Readonly our $SPACE       => q{ };
-Readonly our $TOC_TITLE   => 'Table of Contents';
-Readonly our $TOC_BACK    => 'Back to Table of Contents';
-Readonly our $DEFAULT_CSS => 'https://cdn.simplecss.org/simple-v1.css';
+Readonly::Scalar our $GITHUB_API  => 'https://api.github.com/markdown';
+Readonly::Scalar our $EMPTY       => q{};
+Readonly::Scalar our $SPACE       => q{ };
+Readonly::Scalar our $TOC_TITLE   => 'Table of Contents';
+Readonly::Scalar our $TOC_BACK    => 'Back to Table of Contents';
+Readonly::Scalar our $DEFAULT_CSS => 'https://cdn.simplecss.org/simple-v1.css';
+Readonly::Scalar our $TRUE        => 1;
+Readonly::Scalar our $FALSE       => 0;
 
 caller or __PACKAGE__->main;
 
@@ -360,8 +362,17 @@ sub create_toc {
 
   my $toc = $self->get_no_title ? $EMPTY : "# \@TOC_TITLE\@\n\n";
 
+  my $in_code_block = $FALSE;
+
   while (<$fh>) {
     chomp;
+
+    if (/^\s*```/xsm) {
+      $in_code_block = $in_code_block ? $FALSE : $TRUE;
+      next;
+    }
+
+    next if $in_code_block;
 
     /^(\#+)\s+(.*?)$/xsm && do {
       my $level = $1;
