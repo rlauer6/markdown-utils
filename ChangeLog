@@ -1,3 +1,11 @@
+Tue Feb  3 16:30:18 2026  Rob Lauer  <rclauer@gmail.com>
+
+	[2.0.2]:
+	* VERSION: bump
+	* bin/md-utils.pl.in
+	(cmd_render)
+	- there are no set_git_user, or set_git_email methods?
+
 Fri Oct 10 10:25:00 2025  Rob Lauer  <rclauer@gmail.com>
 
 	[2.0.1]:

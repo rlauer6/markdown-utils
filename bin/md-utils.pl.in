@@ -21,7 +21,7 @@ our $VERSION = '@PACKAGE_VERSION@';
 use parent qw(CLI::Simple);
 
 ########################################################################
-sub choose(&) {  ## no critic
+sub choose(&) { ## no critic
 ########################################################################
   return $_[0]->();
 }
@@ -109,9 +109,6 @@ sub cmd_render {
   }
 
   my ( $git_user, $git_email ) = $self->get_git_user();
-
-  $self->set_git_user( $git_user   // $EMPTY );
-  $self->set_git_email( $git_email // $EMPTY );
 
   my $md = Markdown::Render->new(
     markdown  => $markdown,
